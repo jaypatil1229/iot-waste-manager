@@ -3,7 +3,7 @@ import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function page() {
+export default function Page() {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
