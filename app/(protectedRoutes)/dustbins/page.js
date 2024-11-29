@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import { RxCross2 } from "react-icons/rx";
 import { FaPlus } from "react-icons/fa";
 
-const page = () => {
+const Page = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
