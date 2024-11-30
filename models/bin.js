@@ -8,8 +8,8 @@ const binSchema = new Schema({
     capacity: { type: Number, required: true },
     defaultCity: { type: String, required: true},
     location: {
-        latitude: { type: String},
-        longitude: { type: String},
+        latitude: { type: Number, default: 0},
+        longitude: { type: Number, default: 0 },
     },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },

@@ -25,11 +25,11 @@ const DashboardAccountInfo = () => {
               <h2 className="leading-none font-semibold">{session.user.name}</h2>
               <span className=" text-sm">{session.user.isAdmin ? "Admin": "Collector"}</span>
             </div>
-            <div className="options-btn">
+            {/* <div className="options-btn">
               <button className="">
                 <IoIosArrowForward />
               </button>
-            </div>
+            </div> */}
           </div>
           <div className="logout-btn-container">
             <button

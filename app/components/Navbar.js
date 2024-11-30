@@ -6,6 +6,8 @@ import React from "react";
 import { IoHomeOutline } from "react-icons/io5";
 import { IoPeopleOutline } from "react-icons/io5";
 import { RiDeleteBin7Line } from "react-icons/ri";
+import Footer from "./Footer";
+
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -48,9 +50,7 @@ const Navbar = () => {
           <span>Dustbins</span>
         </Link>
       </div>
-      <div className="footer p-2 bg-blue-400 rounded-2xl">
-        <p>&copy; Waste Management System</p>
-      </div>
+      <Footer />
     </nav>
   );
 };

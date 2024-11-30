@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { RxCross2 } from "react-icons/rx";
 import { FaPlus } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 const Page = () => {
   const { data: session, status } = useSession();
@@ -72,8 +73,10 @@ const Page = () => {
       await fetchBins();
       setShowForm(false); // Close the form
       setNewBin({ name: "",pin:"", email: "", password: "" }); // Reset the form
+      toast.success("Dustbin created successfully")
     } catch (error) {
-      console.error("Error creating collector:", error);
+      console.error("Error creating dustbin:", error);
+      toast.error("Failed to create dustbin")
     }
 
     setShowForm(false);
@@ -91,14 +94,15 @@ const Page = () => {
         });
 
         if (res.ok) {
-          // If successful, remove the deleted collector from the state
           setBins((prevBins) => prevBins.filter((bin) => bin._id !== id));
+          toast.success("Dustbin deleted successfully")
         } else {
-          // console.error("Failed to delete collector");
           console.error(res.error);
+          toast.error("Failed to delete dustbin")
         }
       } catch (error) {
         console.error("Error deleting collector:", error);
+        toast.error("Failed to delete dustbin")
       }
     }
   };

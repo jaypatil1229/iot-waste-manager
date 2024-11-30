@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { IoPersonAdd } from "react-icons/io5";
 import { RxCross2 } from "react-icons/rx";
+import { toast } from "react-toastify";
 
 const CollectorsPage = () => {
   const { data: session, status } = useSession();
@@ -75,8 +76,10 @@ const CollectorsPage = () => {
       setCollectors((prev) => [...prev, data]); // Update collectors list with the new collector
       setShowForm(false); // Close the form
       setNewCollector({ name: "", email: "", password: "" }); // Reset the form
+      toast.success("Collector created successfully");
     } catch (error) {
       console.error("Error creating collector:", error);
+      toast.error("Failed to create collector");
     }
 
 
@@ -97,12 +100,15 @@ const CollectorsPage = () => {
           setCollectors((prevCollectors) =>
             prevCollectors.filter((collector) => collector._id !== id)
           );
+          toast.success("Collector deleted successfully");
         } else {
           // console.error("Failed to delete collector");
           console.error(res.error)
+          toast.error("Failed to delete collector");
         }
       } catch (error) {
         console.error("Error deleting collector:", error);
+        toast.error("Failed to delete collector");
       }
     }
   };
@@ -248,9 +254,6 @@ const CollectorsPage = () => {
                       {collector.binsCollected}
                     </td>
                     <td className="flex gap-2 justify-center items-center p-1">
-                      <button className="px-3 py-2 bg-blue-500 rounded-full text-white font-semibold">
-                        View
-                      </button>
                       <button onClick={() => handleDelete(collector._id)} className="px-3 py-2 bg-red-500 rounded-full text-white font-semibold">
                         Delete
                       </button>

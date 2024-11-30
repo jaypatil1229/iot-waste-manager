@@ -54,44 +54,36 @@ export async function DELETE(req, { params }) {
 
 export async function POST(req, { params }) {
   try {
-    const { id } = await params; // Access bin ID from params
-    const {isFull } = await req.json(); // Extract updated fields from body
-    console.log(isFull);
-
-    // Ensure the required fields are provided
-    if (typeof isFull !== "boolean") {
+    const { id } = await params;
+    await dbConnect();
+    const { isFull, latitude, longitude } = await req.json(); 
+    
+    if (typeof isFull !== "boolean" || latitude === undefined || longitude === undefined) {
       return new Response(JSON.stringify({ error: "Invalid data" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
 
-    // Connect to the database
-    await dbConnect();
-
-    // Update the bin in the database
-    const updatedBin = await Bin.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          isFull,
-          updatedAt: new Date().toISOString(),
-        },
-      },
-      { new: true }
-    );
-
-    if (!updatedBin) {
+    // Find the bin by ID
+    const bin = await Bin.findById(id);
+    if (!bin) {
       return new Response(
-        JSON.stringify({ error: "Bin not found or no changes made" }),
-        { status: 404, headers: { "Content-Type": "application/json" } }
+        JSON.stringify({ error: "Bin not found" }),
+        { status: 404 }
       );
     }
 
-    // Successfully updated the bin
+    // Update the bin data
+    bin.isFull = isFull;
+    bin.location = { latitude, longitude };
+    bin.updatedAt = new Date();
+
+    await bin.save();
+
     return new Response(
-      JSON.stringify({ message: "Bin updated successfully", data: updatedBin }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({ message: "Bin updated successfully", bin }),
+      { status: 200 }
     );
   } catch (error) {
     console.error("Error updating bin:", error);
