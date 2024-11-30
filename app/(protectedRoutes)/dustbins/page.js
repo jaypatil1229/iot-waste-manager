@@ -72,11 +72,11 @@ const Page = () => {
 
       await fetchBins();
       setShowForm(false); // Close the form
-      setNewBin({ name: "",pin:"", email: "", password: "" }); // Reset the form
-      toast.success("Dustbin created successfully")
+      setNewBin({ name: "", pin: "", email: "", password: "" }); // Reset the form
+      toast.success("Dustbin created successfully");
     } catch (error) {
       console.error("Error creating dustbin:", error);
-      toast.error("Failed to create dustbin")
+      toast.error("Failed to create dustbin");
     }
 
     setShowForm(false);
@@ -95,24 +95,22 @@ const Page = () => {
 
         if (res.ok) {
           setBins((prevBins) => prevBins.filter((bin) => bin._id !== id));
-          toast.success("Dustbin deleted successfully")
+          toast.success("Dustbin deleted successfully");
         } else {
           console.error(res.error);
-          toast.error("Failed to delete dustbin")
+          toast.error("Failed to delete dustbin");
         }
       } catch (error) {
         console.error("Error deleting collector:", error);
-        toast.error("Failed to delete dustbin")
+        toast.error("Failed to delete dustbin");
       }
     }
   };
-
 
   const handleViewClick = (binId) => {
     // Navigate to the dustbin's page using the bin's ID
     router.push(`/dustbins/${binId}`);
   };
-
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
@@ -166,9 +164,7 @@ const Page = () => {
                 className="border-2 border-slate-300 px-3 p-2 rounded-3xl w-72"
                 placeholder="Enter dustbin pin(safety purpose)"
                 required
-                onChange={(e) =>
-                  setNewBin({ ...newBin, pin: e.target.value })
-                }
+                onChange={(e) => setNewBin({ ...newBin, pin: e.target.value })}
               />
             </div>
             <div className="flex flex-col">
@@ -256,20 +252,29 @@ const Page = () => {
                     <td className="text-center p-1">{bin.capacity}</td>
                     <td className="text-center p-1">{bin.defaultCity}</td>
                     {bin.isFull ? (
-                      <td className="text-center p-1 text-red-600 font-semibold">Full</td>
+                      <td className="text-center p-1 text-red-600 font-semibold">
+                        Full
+                      </td>
                     ) : (
-                      <td className="text-center p-1 text-green-600 font-semibold">Not Full</td>
+                      <td className="text-center p-1 text-green-600 font-semibold">
+                        Not Full
+                      </td>
                     )}
                     <td className="flex gap-2 justify-center items-center p-1">
-                      <button onClick={()=>handleViewClick(bin.binId)} className="px-3 py-2 bg-blue-500 rounded-full text-white font-semibold">
+                      <button
+                        onClick={() => handleViewClick(bin.binId)}
+                        className="px-3 py-2 bg-blue-500 rounded-full text-white font-semibold"
+                      >
                         View
                       </button>
-                      <button
-                        onClick={() => handleDelete(bin._id)}
-                        className="px-3 py-2 bg-red-500 rounded-full text-white font-semibold"
-                      >
-                        Delete
-                      </button>
+                      {session?.user.isAdmin && (
+                        <button
+                          onClick={() => handleDelete(bin._id)}
+                          className="px-3 py-2 bg-red-500 rounded-full text-white font-semibold"
+                        >
+                          Delete
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );
