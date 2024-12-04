@@ -1,5 +1,4 @@
-// components/ServiceWorker.js
-
+"use client";
 import { useEffect } from 'react';
 
 const ServiceWorker = () => {
