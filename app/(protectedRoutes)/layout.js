@@ -2,8 +2,8 @@ import "../globals.css";
 import { Poppins } from "next/font/google";
 import Navbar from "../components/Navbar";
 import SessionProviderWrapper from "../components/SessionProviderWrapper";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Configure the font with weights and subsets
 const poppins = Poppins({
@@ -12,13 +12,13 @@ const poppins = Poppins({
   variable: "--font-poppins", // CSS variable for Tailwind or custom styles
 });
 
-
 export const metadata = {
   title: "IoT West Manager",
   description: "Automate Cleaning Routes",
 };
 
 export default function RootLayout({ children }) {
+
   return (
     <html lang="en">
       <body

@@ -1,19 +1,21 @@
 "use client";
 import Map from "@/app/components/Map";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { IoIosArrowBack } from "react-icons/io";
 import { PiSealWarningBold } from "react-icons/pi";
 import { LuBadgeCheck } from "react-icons/lu";
 import { toast } from "react-toastify";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import { getSocket } from "@/lib/socket";
 
 const DustbinPage = ({ params }) => {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [bin, setBin] = useState(null); // Initialize with `null` instead of empty object
   const [loading, setLoading] = useState(true);
+  const socket = useMemo(() => getSocket(), []);
   // const [binCollections, setBinCollections] = useState([]);
   // const [binData, setBinData] = useState(null);
 
@@ -41,6 +43,84 @@ const DustbinPage = ({ params }) => {
 
     fetchBin();
   }, [params]);
+
+  useEffect(() => {
+    // Request permission for browser notifications
+    if ("Notification" in window) {
+      if (Notification.permission !== "granted") {
+        Notification.requestPermission().then((permission) => {
+          if (permission === "granted") {
+            console.log("Notification permission granted.");
+          } else {
+            console.log("Notification permission denied.");
+          }
+        });
+      }
+    }
+    socket.on("connect", () => {
+      console.log("Connected to WebSocket server!");
+    });
+
+    socket.on("binUpdated", (data) => {
+      console.log("Bin updated:", data);
+      // Update bin status
+      setBin(data.bin);
+
+      if ("Notification" in window) {
+        // Notification is supported
+        if (Notification.permission !== "granted") {
+          Notification.requestPermission().then(function (permission) {
+           if(permission === "granted") {
+            const notification = new Notification("Bin Updated", {
+              body: `Bin ${data.bin.binId} is now ${
+                data.bin.isFull ? "full" : "empty"
+              }`,
+            });
+            notification.onclick = function () {
+              router.push(`/dustbins/${data.bin.binId}`);
+            };
+            // notification.vibrate = [100, 50, 100];
+            // notification.badge = "/favicon.ico";
+            // notification.icon = "/favicon.ico";
+            // notification.requireInteraction = true;
+            // notification.silent = false;
+            notification.tag = "bin-update-notification";
+            // notification.renotify = true;
+            notification.timestamp = Date.now();
+            notification.show();
+           }else{
+            console.log("User denied the notification permission");
+            toast.error("You've denied notification permission");
+           }
+          });
+        } else {
+          const notification = new Notification("Bin Updated", {
+            body: `Bin ${data.bin.binId} is now ${
+              data.bin.isFull ? "full" : "empty"
+            }`,
+          });
+          notification.onclick = function () {
+            router.push(`/dustbins/${data.bin.binId}`);
+          };
+          // notification.vibrate = [100, 50, 100];
+          // notification.badge = "/favicon.ico";
+          // notification.icon = "/favicon.ico";
+          // notification.requireInteraction = true;
+          // notification.silent = false;
+          notification.tag = "bin-update-notification";
+          // notification.renotify = true;
+          notification.timestamp = Date.now();
+          notification.show();
+        }
+      } else {
+        console.log("Notifications are not supported in this browser.");
+      }
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, []);
 
   if (status === "loading") {
     return (
@@ -74,8 +154,8 @@ const DustbinPage = ({ params }) => {
     const updatedBin = await res.json();
     console.log(updatedBin);
     setBin(updatedBin.bin); // Update bin state with new data
-    setLoading(false); 
-    toast.success("Bin updated successfully")
+    setLoading(false);
+    toast.success("Bin updated successfully");
   }
 
   const collectBin = async (id) => {

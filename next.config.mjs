@@ -7,6 +7,7 @@ const nextConfig = {
       };
       return config;
     },
+    // strictModel: false,
   };
   
   export default nextConfig;

@@ -2,7 +2,6 @@ import dbConnect from "@/lib/dbConnect";
 import Bin from "@/models/bin";
 import BinCollection from "@/models/binCollection";
 import Collector from "@/models/collector";
-
 export async function GET(req, { params }) {
   try {
     // Connect to the database
@@ -69,6 +68,9 @@ export async function POST(req) {
     await bin.save();
     collector.binsCollected = collector.binsCollected ? collector.binsCollected + 1 : 1;
     await collector.save();
+
+
+   
 
     // Return a success response
     return new Response(

@@ -52,13 +52,17 @@ export async function DELETE(req, { params }) {
   }
 }
 
-export async function POST(req, { params }) {
+export async function POST(req,{ params }) {
   try {
     const { id } = await params;
     await dbConnect();
-    const { isFull, latitude, longitude } = await req.json(); 
-    
-    if (typeof isFull !== "boolean" || latitude === undefined || longitude === undefined) {
+    const { isFull, latitude, longitude } = await req.json();
+
+    if (
+      typeof isFull !== "boolean" ||
+      latitude === undefined ||
+      longitude === undefined
+    ) {
       return new Response(JSON.stringify({ error: "Invalid data" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
@@ -68,10 +72,9 @@ export async function POST(req, { params }) {
     // Find the bin by ID
     const bin = await Bin.findById(id);
     if (!bin) {
-      return new Response(
-        JSON.stringify({ error: "Bin not found" }),
-        { status: 404 }
-      );
+      return new Response(JSON.stringify({ error: "Bin not found" }), {
+        status: 404,
+      });
     }
 
     // Update the bin data
@@ -80,6 +83,14 @@ export async function POST(req, { params }) {
     bin.updatedAt = new Date();
 
     await bin.save();
+
+
+
+    if (global.io) {
+      console.log("global.io")
+      global.io.emit("binUpdated", { bin });
+    }
+    console.log("binUpdated");
 
     return new Response(
       JSON.stringify({ message: "Bin updated successfully", bin }),
