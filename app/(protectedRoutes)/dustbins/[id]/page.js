@@ -71,6 +71,8 @@ const DustbinPage = ({ params }) => {
             data.bin.isFull ? "full" : "empty"
           }`,
           // icon: '/path-to-your-icon.png', // Optional: Use an icon for the notification
+        }).addEventListener("click",() => {
+          router.push(`/dustbins/${data.bin.binId}`);
         });
       }
       // if ("Notification" in window) {
