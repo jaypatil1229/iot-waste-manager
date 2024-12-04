@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "node server.js",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "start": "node server.js"
   },
   "dependencies": {
     "@react-google-maps/api": "^2.20.3",
