@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import SessionProviderWrapper from "../components/SessionProviderWrapper";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ServiceWorker from "../components/ServiceWorker";
 
 // Configure the font with weights and subsets
 const poppins = Poppins({
@@ -28,6 +29,7 @@ export default function RootLayout({ children }) {
           <div className="nav-container w-1/6">
             <Navbar />
           </div>
+          <ServiceWorker /> 
           {children}
           <ToastContainer />
         </SessionProviderWrapper>
