@@ -10,15 +10,20 @@ export default function Home() {
   const router = useRouter();
   const socket = useMemo(() => getSocket(), []);
 
-
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
+    if ("serviceWorker" in navigator) {
       // Register the service worker
-      navigator.serviceWorker.register('/sw.js').then((registration) => {
-        console.log('Service Worker registered with scope:', registration.scope);
-      }).catch((error) => {
-        console.error('Service Worker registration failed:', error);
-      });
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((registration) => {
+          console.log(
+            "Service Worker registered with scope:",
+            registration.scope
+          );
+        })
+        .catch((error) => {
+          console.error("Service Worker registration failed:", error);
+        });
     }
 
     if ("Notification" in window) {
@@ -37,20 +42,26 @@ export default function Home() {
     socket.on("connect", () => {
       console.log("Connected to WebSocket server!");
     });
+    console.log(window.Notification? "notification" : "no notification");
 
     socket.on("binUpdated", (data) => {
       console.log("Bin updated:", data);
-      if (Notification.permission === 'granted') {
-        // Use the service worker to show the notification
-        navigator.serviceWorker.ready.then((registration) => {
-          registration.showNotification('Bin is full!', {
-            body: `Bin ${data.bin.binId} is now ${
-              data.bin.isFull ? "full" : "empty"
-            }`,
-            data: { binId: data.bin.binId }, 
-            // icon: '/path-to-your-icon.png', // Optional: Use an icon for the notification
+      if ("Notification" in window) {
+        console.log("notificationn found")
+        if (Notification?.permission === "granted") {
+          // Use the service worker to show the notification
+          navigator.serviceWorker.ready.then((registration) => {
+            registration.showNotification("Bin is full!", {
+              body: `Bin ${data.bin.binId} is now ${
+                data.bin.isFull ? "full" : "empty"
+              }`,
+              data: { binId: data.bin.binId },
+              // icon: '/path-to-your-icon.png', // Optional: Use an icon for the notification
+            });
           });
-        });
+        }
+      }else{
+        console.log("Notification is not supported.");
       }
       // if ("Notification" in window) {
       //   // Notification is supported

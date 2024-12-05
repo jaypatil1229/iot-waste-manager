@@ -45,6 +45,21 @@ const DustbinPage = ({ params }) => {
   }, [params]);
 
   useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      // Register the service worker
+      navigator.serviceWorker
+        .register("/sw.js")
+        .then((registration) => {
+          console.log(
+            "Service Worker registered with scope:",
+            registration.scope
+          );
+        })
+        .catch((error) => {
+          console.error("Service Worker registration failed:", error);
+        });
+    }
+
     if ("Notification" in window) {
       // Request permission to show notifications
       Notification.requestPermission().then((permission) => {
@@ -61,19 +76,27 @@ const DustbinPage = ({ params }) => {
     socket.on("connect", () => {
       console.log("Connected to WebSocket server!");
     });
+    // console.log(window.Notification ? "notification" : "no notification");
 
     socket.on("binUpdated", (data) => {
       console.log("Bin updated:", data);
-      setBin(data);
-      if (Notification.permission === "granted") {
-        new Notification("Bin is full!", {
-          body: `Bin ${data.bin.binId} is now ${
-            data.bin.isFull ? "full" : "empty"
-          }`,
-          // icon: '/path-to-your-icon.png', // Optional: Use an icon for the notification
-        }).addEventListener("click",() => {
-          router.push(`/dustbins/${data.bin.binId}`);
-        });
+      setBin(data.bin);
+      if ("Notification" in window) {
+        console.log("notificationn found");
+        if (Notification?.permission === "granted") {
+          // Use the service worker to show the notification
+          navigator.serviceWorker.ready.then((registration) => {
+            registration.showNotification("Bin is full!", {
+              body: `Bin ${data.bin.binId} is now ${
+                data.bin.isFull ? "full" : "empty"
+              }`,
+              data: { binId: data.bin.binId },
+              // icon: '/path-to-your-icon.png', // Optional: Use an icon for the notification
+            });
+          });
+        }
+      } else {
+        console.log("Notification is not supported.");
       }
       // if ("Notification" in window) {
       //   // Notification is supported
