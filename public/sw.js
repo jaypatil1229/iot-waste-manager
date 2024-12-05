@@ -5,8 +5,8 @@ self.addEventListener('push', (event) => {
     
     const options = {
       body: data.body,
-      icon: '/path-to-your-icon.png',
-      badge: '/badge-icon.png',
+    //   icon: '/path-to-your-icon.png',
+    //   badge: '/badge-icon.png',
       data: { binId: data.binId }  // Store binId in the notification data
     };
   
@@ -34,7 +34,7 @@ self.addEventListener('push', (event) => {
           client.focus();
         } else {
           // Otherwise, open a new window/tab with the binId URL
-          clients.openWindow(`/bins/${binId}`);
+          clients.openWindow(`/dustbins/${binId}`);
         }
       })
     );
