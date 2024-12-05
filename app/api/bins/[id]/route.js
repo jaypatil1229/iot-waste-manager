@@ -1,5 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import Bin from "@/models/bin";
+import collector from "@/models/collector";
 
 export async function GET(req, { params }) {
   try {
@@ -52,7 +53,7 @@ export async function DELETE(req, { params }) {
   }
 }
 
-export async function POST(req,{ params }) {
+export async function POST(req, { params }) {
   try {
     const { id } = await params;
     await dbConnect();
@@ -79,19 +80,19 @@ export async function POST(req,{ params }) {
 
     // Update the bin data
     bin.isFull = isFull;
-    bin.location = { latitude, longitude };
+    if (latitude && longitude) {
+      bin.location = { latitude, longitude };
+    }
     bin.updatedAt = new Date();
 
     await bin.save();
 
-
-
     if (global.io) {
-      console.log("global.io")
+      console.log("global.io");
       global.io.emit("binUpdated", { bin });
     }
-    console.log("binUpdated");
 
+    console.log("binUpdated");
     return new Response(
       JSON.stringify({ message: "Bin updated successfully", bin }),
       { status: 200 }

@@ -55,7 +55,7 @@ export const authOptions = NextAuth({
       if (user) {
         token.id = user.id; // Correctly set user ID to token
         token.isAdmin = user.isAdmin; // Add isAdmin to the JWT token
-        token.accessToken = user.accessToken;
+        // token.accessToken = user.accessToken;
       }
       return token;
     },
@@ -63,7 +63,7 @@ export const authOptions = NextAuth({
     // Customize the session object
     async session({ session, token }) {
       if (token) {
-        session.accessToken = token.accessToken;
+        // session.accessToken = token.accessToken;
         session.user.id = token.id; // Correctly assign user ID to session
         session.user.isAdmin = token.isAdmin; // Correctly assign isAdmin to session
       }

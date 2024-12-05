@@ -1,12 +1,10 @@
-// public/sw.js
-
 self.addEventListener('push', (event) => {
     const data = event.data.json();
     
     const options = {
       body: data.body,
-    //   icon: '/path-to-your-icon.png',
-    //   badge: '/badge-icon.png',
+      icon: '/images/male-pfp.png',
+      badge: '/images/male-pfp.png',
       data: { binId: data.binId }  // Store binId in the notification data
     };
   

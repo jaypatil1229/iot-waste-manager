@@ -5,6 +5,9 @@ import React, { useEffect, useState } from "react";
 import { RxCross2 } from "react-icons/rx";
 import { FaPlus } from "react-icons/fa";
 import { toast } from "react-toastify";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { FaRegEye } from "react-icons/fa";
+import Loading from "@/app/components/Loading";
 
 const Page = () => {
   const { data: session, status } = useSession();
@@ -112,11 +115,11 @@ const Page = () => {
     router.push(`/dustbins/${binId}`);
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loading/>;
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className="relative p-3 bg-zinc-100 flex-1 rounded-3xl flex flex-col gap-3">
+    <div className="w-full sm:w-5/6 h-full overflow-x-hidden relative p-3 bg-zinc-100 flex-1 rounded-3xl flex flex-col gap-3">
       {showForm && (
         <div
           className={`form-container flex absolute z-10 bg-slate-100/80 w-full h-full top-0 left-0 rounded-3xl  items-center justify-center`}
@@ -215,8 +218,8 @@ const Page = () => {
         </div>
       )}
 
-      <div className="header flex justify-between">
-        <h2 className="font-semibold text-xl">Dustbins</h2>
+      <div className="header flex justify-between items-center">
+        <h2 className="font-semibold text-xl ml-6">Dustbins</h2>
         <div className="options flex gap-3">
           {session.user.isAdmin && (
             <button
@@ -234,11 +237,11 @@ const Page = () => {
         <p>No Bins found.</p>
       ) : (
         <div className="bins w-full h-full overflow-y-scroll">
-          <table className="min-w-full table-auto max-h-screen overflow-y-scroll">
+          <table className="min-w-full table-auto max-h-screen overflow-y-scroll text-sm sm:text-base">
             <thead>
               <tr>
                 <th className="border-b-2 py-1">Dustbin ID</th>
-                <th className="border-b-2 py-1">Capacity&#40;ltr&#41; </th>
+                <th className="border-b-2 py-1 hidden sm:block">Capacity&#40;ltr&#41; </th>
                 <th className="border-b-2 py-1">Default City</th>
                 <th className="border-b-2 py-1">Bins Status</th>
                 <th className="border-b-2 py-1">Actions</th>
@@ -249,7 +252,7 @@ const Page = () => {
                 return (
                   <tr key={index}>
                     <td className="text-center p-1">{bin.binId}</td>
-                    <td className="text-center p-1">{bin.capacity}</td>
+                    <td className="text-center p-1 hidden sm:block">{bin.capacity}</td>
                     <td className="text-center p-1">{bin.defaultCity}</td>
                     {bin.isFull ? (
                       <td className="text-center p-1 text-red-600 font-semibold">
@@ -263,16 +266,22 @@ const Page = () => {
                     <td className="flex gap-2 justify-center items-center p-1">
                       <button
                         onClick={() => handleViewClick(bin.binId)}
-                        className="px-3 py-2 bg-blue-500 rounded-full text-white font-semibold"
+                        className="px-2 sm:px-3 py-2 bg-blue-500 rounded-full text-white font-semibold"
                       >
-                        View
+                        <span className="sm:hidden">
+                          <FaRegEye />
+                        </span>
+                        <span className="hidden sm:block">View</span>
                       </button>
                       {session?.user.isAdmin && (
                         <button
                           onClick={() => handleDelete(bin._id)}
-                          className="px-3 py-2 bg-red-500 rounded-full text-white font-semibold"
+                          className="px-2 sm:px-3 py-2 bg-red-500 rounded-full text-white font-semibold"
                         >
-                          Delete
+                          <span className="sm:hidden">
+                            <RiDeleteBin6Line />
+                          </span>
+                          <span className="hidden sm:block">Delete</span>
                         </button>
                       )}
                     </td>

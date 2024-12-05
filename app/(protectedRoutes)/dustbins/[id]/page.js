@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { getSocket } from "@/lib/socket";
+import Loading from "@/app/components/Loading";
 
 const DustbinPage = ({ params }) => {
   const router = useRouter();
@@ -81,23 +82,26 @@ const DustbinPage = ({ params }) => {
     socket.on("binUpdated", (data) => {
       console.log("Bin updated:", data);
       setBin(data.bin);
-      if ("Notification" in window) {
-        console.log("notificationn found");
-        if (Notification?.permission === "granted") {
-          // Use the service worker to show the notification
-          navigator.serviceWorker.ready.then((registration) => {
-            registration.showNotification("Bin is full!", {
-              body: `Bin ${data.bin.binId} is now ${
-                data.bin.isFull ? "full" : "empty"
-              }`,
-              data: { binId: data.bin.binId },
-              // icon: '/path-to-your-icon.png', // Optional: Use an icon for the notification
+      if (data.bin.isFull) {
+        if ("Notification" in window) {
+          console.log("notificationn found");
+          if (Notification?.permission === "granted") {
+            // Use the service worker to show the notification
+            navigator.serviceWorker.ready.then((registration) => {
+              registration.showNotification("Bin is full!", {
+                body: `Bin ${data.bin.binId} is now ${
+                  data.bin.isFull ? "full" : "empty"
+                }`,
+                data: { binId: data.bin.binId },
+                // icon: '/path-to-your-icon.png', // Optional: Use an icon for the notification
+              });
             });
-          });
+          }
+        } else {
+          console.log("Notification is not supported.");
         }
-      } else {
-        console.log("Notification is not supported.");
       }
+
       // if ("Notification" in window) {
       //   // Notification is supported
       //   if (Notification.permission !== "granted") {
@@ -151,9 +155,7 @@ const DustbinPage = ({ params }) => {
 
   if (status === "loading") {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-lg text-gray-500">Loading...</div>
-      </div>
+      <Loading/>
     );
   }
 
@@ -221,16 +223,14 @@ const DustbinPage = ({ params }) => {
   // Loading state display
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-lg text-gray-500">Loading...</div>
-      </div>
+      <Loading/>
     );
   }
 
   // Render bin details when data is available
   return (
-    <div className="relative p-3 bg-zinc-100 flex-1 rounded-3xl flex flex-col gap-3">
-      <div className="header w-full">
+    <div className="w-full sm:w-5/6 h-full overflow-x-hidden relative p-3 bg-zinc-100 rounded-3xl flex flex-col gap-3">
+      <div className="header sticky top-0 left-0 z-10 w-full ml-6">
         <button
           className="p-2 bg-gray-200 hover:bg-gray-300 rounded-full"
           onClick={() => router.push("/dustbins")}
@@ -239,12 +239,12 @@ const DustbinPage = ({ params }) => {
         </button>
       </div>
       {/* <hr className="border border-slate-300" /> */}
-      <div className="info-container w-full max-h-screen flex-1 flex flex-col gap-3">
+      <div className="info-container w-full h-full flex flex-col gap-3">
         <h1 className="text-3xl font-semibold text-gray-800">
           Dustbin Details
         </h1>
-        <div className="info-body w-full flex-1 flex gap-3">
-          <div className="w-1/2  bg-white shadow-lg rounded-xl p-4 flex flex-col gap-3">
+        <div className="info-body w-full h-full max-h-full flex flex-col sm:flex-row gap-3">
+          <div className="w-full sm:w-1/2 bg-white shadow-lg rounded-xl p-4 flex flex-col gap-3">
             <div className="bin-info relative flex flex-col gap-1">
               <div className="status absolute top-0 right-0">
                 {bin.isFull ? (
@@ -319,7 +319,7 @@ const DustbinPage = ({ params }) => {
               )}
             </div>
           </div>
-          <div className="map-container w-1/2 bg-white shadow-lg rounded-xl">
+          <div className="map-container w-full sm:w-1/2 min-h-full bg-white shadow-lg rounded-xl">
             {/* Map component */}
             <Map
               location={bin.location}

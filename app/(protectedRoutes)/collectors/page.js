@@ -5,6 +5,8 @@ import React, { useEffect, useState } from "react";
 import { IoPersonAdd } from "react-icons/io5";
 import { RxCross2 } from "react-icons/rx";
 import { toast } from "react-toastify";
+import { RiDeleteBin6Line } from "react-icons/ri";
+import Loading from "@/app/components/Loading";
 
 const CollectorsPage = () => {
   const { data: session, status } = useSession();
@@ -113,11 +115,11 @@ const CollectorsPage = () => {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loading/>;
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div className="relative p-3 bg-zinc-100 flex-1 rounded-3xl flex flex-col gap-3">
+    <div className="w-full sm:w-5/6 h-full overflow-x-hidden p-3 bg-zinc-100 rounded-3xl flex flex-col gap-3">
       {showForm && (
         <div
           className={`form-container flex absolute z-10 bg-slate-100/80 w-full h-full top-0 left-0 rounded-3xl  items-center justify-center`}
@@ -214,8 +216,8 @@ const CollectorsPage = () => {
         </div>
       )}
 
-      <div className="header flex justify-between">
-        <h2 className="font-semibold text-xl">Collectors</h2>
+      <div className="header flex justify-between items-center">
+        <h2 className="font-semibold text-xl ml-6">Collectors</h2>
         <div className="options flex gap-3">
           {session.user.isAdmin && (
             <button
@@ -233,12 +235,13 @@ const CollectorsPage = () => {
         <p>No collectors found.</p>
       ) : (
         <div className="collectors w-full h-full overflow-y-scroll">
-          <table className="min-w-full table-auto max-h-screen overflow-y-scroll">
+          <table className="min-w-full table-auto max-h-screen overflow-y-scroll text-sm sm:text-base
+          ">
             <thead>
-              <tr>
+              <tr className="">
                 <th className="border-b-2 py-1">Name</th>
                 <th className="border-b-2 py-1">Email</th>
-                <th className="border-b-2 py-1">City</th>
+                <th className="border-b-2 py-1 hidden sm:block">City</th>
                 <th className="border-b-2 py-1">Bins Collected</th>
                 <th className="border-b-2 py-1">Actions</th>
               </tr>
@@ -248,14 +251,15 @@ const CollectorsPage = () => {
                 return (
                   <tr key={index}>
                     <td className="text-center p-1">{collector.name}</td>
-                    <td className="text-center p-1">{collector.email}</td>
-                    <td className="text-center p-1">{collector.city}</td>
+                    <td className="text-center p-1 ">{collector.email}</td>
+                    <td className="text-center p-1 hidden sm:block">{collector.city}</td>
                     <td className="text-center p-1">
                       {collector.binsCollected}
                     </td>
                     <td className="flex gap-2 justify-center items-center p-1">
-                      <button onClick={() => handleDelete(collector._id)} className="px-3 py-2 bg-red-500 rounded-full text-white font-semibold">
-                        Delete
+                      <button onClick={() => handleDelete(collector._id)} className="px-2 sm:px-3 py-2 bg-red-500 rounded-full text-white font-semibold">
+                        <span className="sm:hidden"><RiDeleteBin6Line /></span>
+                        <span className="hidden sm:block">Delete</span>
                       </button>
                     </td>
                   </tr>
