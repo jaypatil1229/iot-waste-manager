@@ -67,7 +67,7 @@ const Page = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("New bin:", newBin);  
+    console.log("New bin:", newBin);
     try {
       const res = await fetch("/api/bins", {
         method: "POST",
@@ -214,7 +214,8 @@ const Page = () => {
                 options={
                   isLoaded
                     ? {
-                        types: ["(cities)"],
+                        //add types to restrict the search to cities, towns, streets etc
+                        types: ["geocode"],
                       }
                     : {}
                 }
