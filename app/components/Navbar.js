@@ -1,14 +1,18 @@
 "use client";
-import { useSession } from "next-auth/react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import React from "react";
+import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
+
 import { IoHomeOutline } from "react-icons/io5";
 import { IoPeopleOutline } from "react-icons/io5";
 import { RiDeleteBin7Line } from "react-icons/ri";
-import Footer from "./Footer";
 import { IoIosCloseCircleOutline } from "react-icons/io";
+import { CiRoute } from "react-icons/ci";
+
 import { useMediaQuery } from "react-responsive";
+
+import Footer from "./Footer";
 
 const Navbar = ({ handleNavbarDisplay }) => {
   const isSmallScreen = useMediaQuery({ maxWidth: 639 });
@@ -61,6 +65,16 @@ const Navbar = ({ handleNavbarDisplay }) => {
         >
           <RiDeleteBin7Line />
           <span>Dustbins</span>
+        </Link>
+        <Link
+          onClick={() => handleNavbarDisplay(!isSmallScreen)}
+          href="/collection-routes"
+          className={`w-full flex gap-2 items-center ${
+            isActive("/collection-routes") ? "bg-blue-400" : ""
+          }  px-3 py-1 rounded-xl font-semibold`}
+        >
+          <CiRoute />
+          <span>Routes</span>
         </Link>
       </div>
       <Footer />

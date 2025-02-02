@@ -59,7 +59,6 @@ const Page = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(newBin);
     try {
       const res = await fetch("/api/bins", {
         method: "POST",
