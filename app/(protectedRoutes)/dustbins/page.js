@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { FaRegEye } from "react-icons/fa";
 import Loading from "@/app/components/Loading";
+import { Autocomplete, useJsApiLoader } from "@react-google-maps/api";
 
 const Page = () => {
   const { data: session, status } = useSession();
@@ -21,6 +22,13 @@ const Page = () => {
     pin: "",
     capacity: "",
     defaultCity: "",
+    cityAddress: "",
+  });
+
+  const { isLoaded } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    libraries: ["places", "geometry"],
   });
 
   async function fetchBins() {
@@ -59,6 +67,7 @@ const Page = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("New bin:", newBin);  
     try {
       const res = await fetch("/api/bins", {
         method: "POST",
@@ -114,7 +123,7 @@ const Page = () => {
     router.push(`/dustbins/${binId}`);
   };
 
-  if (loading) return <Loading/>;
+  if (loading) return <Loading />;
   if (error) return <p>Error: {error}</p>;
 
   return (
@@ -192,17 +201,36 @@ const Page = () => {
               >
                 Default City
               </label>
-              <input
-                type="text"
-                name="defaultCity"
-                id="defaultCity"
-                className="border-2 border-slate-300 px-3 p-2 rounded-3xl w-72"
-                placeholder="Enter default city"
-                required
-                onChange={(e) =>
-                  setNewBin({ ...newBin, defaultCity: e.target.value })
+              <Autocomplete
+                className="flex-1"
+                onPlaceChanged={function () {
+                  const place = this.getPlace();
+                  setNewBin({
+                    ...newBin,
+                    defaultCity: place.name,
+                    cityAddress: place.formatted_address,
+                  });
+                }}
+                options={
+                  isLoaded
+                    ? {
+                        types: ["(cities)"],
+                      }
+                    : {}
                 }
-              />
+              >
+                <input
+                  type="text"
+                  name="defaultCity"
+                  id="defaultCity"
+                  className="border-2 border-slate-300 px-3 p-2 rounded-3xl w-72"
+                  placeholder="Enter default city"
+                  required
+                  onChange={(e) =>
+                    setNewBin({ ...newBin, defaultCity: e.target.value })
+                  }
+                />
+              </Autocomplete>
             </div>
 
             <div className="submit-btn">
@@ -240,7 +268,9 @@ const Page = () => {
             <thead>
               <tr>
                 <th className="border-b-2 py-1">Dustbin ID</th>
-                <th className="border-b-2 py-1 hidden sm:block">Capacity&#40;ltr&#41; </th>
+                <th className="border-b-2 py-1 hidden sm:block">
+                  Capacity&#40;ltr&#41;{" "}
+                </th>
                 <th className="border-b-2 py-1">Default City</th>
                 <th className="border-b-2 py-1">Bins Status</th>
                 <th className="border-b-2 py-1">Actions</th>
@@ -251,7 +281,9 @@ const Page = () => {
                 return (
                   <tr key={index}>
                     <td className="text-center p-1">{bin.binId}</td>
-                    <td className="text-center p-1 hidden sm:block">{bin.capacity}</td>
+                    <td className="text-center p-1 hidden sm:block">
+                      {bin.capacity}
+                    </td>
                     <td className="text-center p-1">{bin.defaultCity}</td>
                     {bin.isFull ? (
                       <td className="text-center p-1 text-red-600 font-semibold">

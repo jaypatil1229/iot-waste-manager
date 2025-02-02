@@ -5,7 +5,7 @@ import SessionProviderWrapper from "../components/SessionProviderWrapper";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import NavContainer from "../components/NavContainer";
-import Head from "next/head";
+
 // import ServiceWorker from "../components/ServiceWorker";
 
 // Configure the font with weights and subsets

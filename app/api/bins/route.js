@@ -1,5 +1,20 @@
 import dbConnect from "@/lib/dbConnect";
 import Bin from "@/models/bin";
+import axios from "axios";
+
+const getCordinates = async (location) => {
+  const apiKey = process.env.GOOGLE_MAPS_API_KEY;
+  const geocodeUrl = process.env.GOOGLE_MAPS_API_GEOCODE;
+  const url = `${geocodeUrl}?address=${location}&key=${apiKey}`;
+  const response = await axios.get(url);
+  const data = response.data;
+  if (data.status === "OK") {
+    const location = data.results[0].geometry.location;
+    return { latitude: location.lat, longitude: location.lng };
+  } else {
+    throw new Error("Error getting coordinates, Please enter a valid location");
+  }
+};
 
 export async function GET(req) {
   try {
@@ -28,8 +43,8 @@ export async function GET(req) {
 export async function POST(req) {
   try {
     await dbConnect();
-    const { binId, pin, capacity, defaultCity } = await req.json();
-    console.log(binId, pin, capacity, defaultCity);
+    const { binId, pin, capacity, defaultCity, cityAddress } = await req.json();
+    console.log(binId, pin, capacity, defaultCity, cityAddress);
     if (!binId || !pin || !capacity || !defaultCity) {
       console.log("not all field are there");
       return new Response(
@@ -37,7 +52,6 @@ export async function POST(req) {
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
-    console.log("valid data");
 
     // Check if the email already exists
     const existingBin = await Bin.findOne({ binId });
@@ -47,8 +61,9 @@ export async function POST(req) {
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
-    console.log("no previous bin");
+    
 
+    const location = await getCordinates(cityAddress || defaultCity);
     // Create new collector
     const newBin = await Bin.create({
       binId,
@@ -56,6 +71,7 @@ export async function POST(req) {
       capacity,
       defaultCity,
       isFull: false,
+      location,
     });
 
     console.log("New Bin created");
