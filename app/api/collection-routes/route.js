@@ -8,8 +8,19 @@ const getCordinates = async (location) => {
   const url = `${geocodeUrl}?address=${location}&key=${apiKey}`;
   const response = await axios.get(url);
   const data = response.data;
-  return data.results[0].geometry.location;
+  if (data.status === "OK") {
+    const location = data.results[0].geometry.location;
+    return { lat: location.lat, lng: location.lng };
+  } else {
+    throw new Error("Error getting coordinates, Please enter a valid location");
+  }
 };
+
+const isCoordinates = (location) => {
+  // check if the location is in coordinates format or not
+  return location.match(/^-?\d+\.\d+,-?\d+\.\d+$/);
+};
+
 export async function GET(req) {
   try {
     await dbConnect();
@@ -18,21 +29,25 @@ export async function GET(req) {
     const start = searchParams.get("start");
     const end = searchParams.get("end");
 
-    if(!start || !end) {
+    if (!start || !end) {
       return new Response(
-        JSON.stringify({ success: false, error: "Missing start or end location" }),
+        JSON.stringify({
+          success: false,
+          error: "Missing start or end location",
+        }),
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    let startCordinates = await getCordinates(start);
+    let startCordinates = isCoordinates(start)
+      ? start
+      : await getCordinates(start);
     let endCordinates = startCordinates;
-    if(start !== end) {
-      endCordinates = await getCordinates(end);
+    if (start !== end) {
+      endCordinates = isCoordinates(end) ? end : await getCordinates(end);
     }
-    // console.log("Start coordinates:", startCordinates);
-    // console.log("End coordinates:", endCordinates);
-
+    console.log("Start coordinates:", startCordinates);
+    console.log("End coordinates:", endCordinates);
 
     // Get empty and full bins
     const emptyBins = await Bin.find({ isFull: false });
@@ -54,8 +69,8 @@ export async function GET(req) {
     }));
 
     const routeData = {
-      start : `${startCordinates.lat},${startCordinates.lng}`,
-      end : `${endCordinates.lat},${endCordinates.lng}`,
+      start: `${startCordinates.lat},${startCordinates.lng}`,
+      end: `${endCordinates.lat},${endCordinates.lng}`,
       waypoints,
       emptyBins,
       fullBins: fullBins,

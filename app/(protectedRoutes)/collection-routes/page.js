@@ -3,11 +3,11 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useJsApiLoader, Autocomplete } from "@react-google-maps/api";
+import { toast } from "react-toastify";
+import { RxCross2 } from "react-icons/rx";
+import { MdMyLocation } from "react-icons/md";
 
 import GoogleMapComponent from "@/app/components/GoogleMap";
-import { RxCross2 } from "react-icons/rx";
-import { toast } from "react-toastify";
-import { set } from "mongoose";
 
 const CollectionRoutesPage = () => {
   const { isLoaded } = useJsApiLoader({
@@ -24,6 +24,7 @@ const CollectionRoutesPage = () => {
     end: "",
   });
   const [routeData, setRouteData] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (status === "loading") return; // Don't do anything if session is still loading
@@ -42,7 +43,17 @@ const CollectionRoutesPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     console.log("Route location:", routeLocation);
+    if (
+      !routeLocation.start ||
+      !routeLocation.end ||
+      routeLocation.start.trim() === "" ||
+      routeLocation.end.trim() === ""
+    ) {
+      toast.error("Start and end locations are required");
+      return;
+    }
     try {
       const response = await fetch(
         `/api/collection-routes?start=${routeLocation.start}&end=${routeLocation.end}`
@@ -61,7 +72,23 @@ const CollectionRoutesPage = () => {
     } catch (error) {
       console.log("Error generating route:", error);
     } finally {
+      setIsLoading(false);
       setShowForm(false);
+    }
+  };
+
+  const getCurrentLocation = (key) => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        setRouteLocation({
+          ...routeLocation,
+          [key]: `${lat}, ${lng}`,
+        });
+      });
+    } else {
+      toast.error("Geolocation is not supported by this browser");
     }
   };
 
@@ -94,65 +121,91 @@ const CollectionRoutesPage = () => {
               <label className="text-sm font-semibold px-1" htmlFor="start">
                 Start Location
               </label>
-              <Autocomplete
-                onPlaceChanged={function () {
-                  const place = this.getPlace();
-                  //get string address and set it to the state
-                  setRouteLocation({
-                    ...routeLocation,
-                    start: place.formatted_address,
-                  });
-                }}
-              >
-                <input
-                  type="text"
-                  name="start"
-                  id="start"
-                  className="border-2 border-slate-300 px-3 p-2 w-full rounded-3xl"
-                  placeholder="Enter start location"
-                  required
-                  onChange={(e) =>
+              <div className="flex gap-2 w-full justify-between">
+                <Autocomplete
+                  className="flex-1"
+                  onPlaceChanged={function () {
+                    const place = this.getPlace();
+                    //get string address and set it to the state
                     setRouteLocation({
                       ...routeLocation,
-                      start: e.target.value,
-                    })
-                  }
-                />
-              </Autocomplete>
+                      start: place.formatted_address,
+                    });
+                  }}
+                >
+                  <input
+                    type="text"
+                    name="start"
+                    id="start"
+                    value={routeLocation.start}
+                    className="border-2 border-slate-300 px-3 p-2 w-full rounded-3xl"
+                    placeholder="Enter start location"
+                    required
+                    onChange={(e) =>
+                      setRouteLocation({
+                        ...routeLocation,
+                        start: e.target.value,
+                      })
+                    }
+                  />
+                </Autocomplete>
+                <button
+                  onClick={() => getCurrentLocation("start")}
+                  type="button"
+                  className="p-1 flex items-center justify-center w-11 h-11 bg-green-500 text-white rounded-full font-semibold text-xs md:text-sm"
+                >
+                  <MdMyLocation size={"1.45em"} />
+                </button>
+              </div>
             </div>
             <div className="flex flex-col w-full">
               <label className="text-sm font-semibold px-1" htmlFor="end">
                 End Location
               </label>
-              <Autocomplete
-                onPlaceChanged={function () {
-                  const place = this.getPlace();
-                  //get string address and set it to the state
-                  setRouteLocation({
-                    ...routeLocation,
-                    end: place.formatted_address,
-                  });
-                }}
-              >
-                <input
-                  type="text"
-                  name="end"
-                  id="end"
-                  className="border-2 border-slate-300 px-3 p-2 rounded-3xl w-full"
-                  placeholder="Enter end location"
-                  required
-                  onChange={(e) =>
-                    setRouteLocation({ ...routeLocation, end: e.target.value })
-                  }
-                />
-              </Autocomplete>
+              <div className="flex gap-2 w-full justify-between ">
+                <Autocomplete
+                  className="flex-1"
+                  onPlaceChanged={function () {
+                    const place = this.getPlace();
+                    //get string address and set it to the state
+                    setRouteLocation({
+                      ...routeLocation,
+                      end: place.formatted_address,
+                    });
+                  }}
+                >
+                  <input
+                    type="text"
+                    name="end"
+                    id="end"
+                    value={routeLocation.end}
+                    className="border-2 border-slate-300 px-3 p-2 w-full rounded-3xl"
+                    placeholder="Enter end location"
+                    required
+                    onChange={(e) =>
+                      setRouteLocation({
+                        ...routeLocation,
+                        end: e.target.value,
+                      })
+                    }
+                  />
+                </Autocomplete>
+                <button
+                  onClick={() => getCurrentLocation("end")}
+                  type="button"
+                  className="p-2 flex items-center justify-center w-11 h-11 bg-green-500 text-white rounded-full font-semibold text-xs md:text-sm"
+                >
+                  <MdMyLocation size={"1.45em"} />
+                </button>
+              </div>
             </div>
-            <div className="submit-btn">
+            <div className="submit-btn mt-2">
               <button
+                disabled={isLoading}
                 type="submit"
-                className="p-2 w-full bg-blue-500 rounded-full text-white font-semibold"
+                className="p-1 w-full bg-blue-500 rounded-full text-white font-semibold"
               >
-                Submit
+                {isLoading ? "Generating Route..." : "Generate Route"}
               </button>
             </div>
           </form>
