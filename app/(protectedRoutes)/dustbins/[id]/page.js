@@ -31,11 +31,6 @@ const DustbinPage = ({ params }) => {
         const data = await res.json();
         console.log(data);
         setBin(data.data);
-
-        // const collectionResponse = await fetch(`/api/bins/${id}/collections`);
-        // const collections = await collectionResponse.json();
-        // console.log(collections);
-        // setBinCollections(collections);
       } catch (error) {
         console.error("Error fetching bin data:", error);
       } finally {
@@ -103,50 +98,7 @@ const DustbinPage = ({ params }) => {
         }
       }
 
-      // if ("Notification" in window) {
-      //   // Notification is supported
-      //   if (Notification.permission !== "granted") {
-      //     Notification.requestPermission().then(function (permission) {
-      //       const notification = new Notification("Bin Updated", {
-      //         body: `Bin ${data.bin.binId} is now ${
-      //           data.bin.isFull ? "full" : "empty"
-      //         }`,
-      //       });
-      //       notification.onclick = function () {
-      //         router.push(`/dustbins/${data.bin.binId}`);
-      //       };
-      //       // notification.vibrate = [100, 50, 100];
-      //       // notification.badge = "/favicon.ico";
-      //       // notification.icon = "/favicon.ico";
-      //       // notification.requireInteraction = true;
-      //       // notification.silent = false;
-      //       notification.tag = "bin-update-notification";
-      //       // notification.renotify = true;
-      //       notification.timestamp = Date.now();
-      //       notification.show();
-      //     });
-      //   } else {
-      //     const notification = new Notification("Bin Updated", {
-      //       body: `Bin ${data.bin.binId} is now ${
-      //         data.bin.isFull ? "full" : "empty"
-      //       }`,
-      //     });
-      //     notification.onclick = function () {
-      //       router.push(`/dustbins/${data.bin.binId}`);
-      //     };
-      //     // notification.vibrate = [100, 50, 100];
-      //     // notification.badge = "/favicon.ico";
-      //     // notification.icon = "/favicon.ico";
-      //     // notification.requireInteraction = true;
-      //     // notification.silent = false;
-      //     notification.tag = "bin-update-notification";
-      //     // notification.renotify = true;
-      //     notification.timestamp = Date.now();
-      //     notification.show();
-      //   }
-      // } else {
-      //   console.log("Notifications are not supported in this browser.");
-      // }
+      //commented out code
     });
 
     return () => {
@@ -167,49 +119,69 @@ const DustbinPage = ({ params }) => {
   async function updateBin(id) {
     setLoading(true); // Set loading true before the update request
 
-    const res = await fetch(`/api/bins/${id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        isFull: !bin.isFull,
-        status: "full",
-        latitude: bin.latitude || 0,
-        longitude: bin.longitude || 0,
-      }),
-    });
-
-    const updatedBin = await res.json();
-    console.log(updatedBin);
-    setBin(updatedBin.bin); // Update bin state with new data
-    setLoading(false);
-    toast.success("Bin updated successfully");
-  }
-
-  const collectBin = async (id) => {
-    setLoading(true);
-
     try {
-      const response = await fetch(`/api/bins/${id}/collections`, {
+      if (bin.status === "processing") {
+        toast.error(
+          "Bin is in processing state, unable update the bin untill the collection is completed"
+        );
+        return;
+      }
+
+      const res = await fetch(`/api/bins/${id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.accessToken}`, // Ensure access token is being passed
+        },
+        body: JSON.stringify({
+          isFull: !bin.isFull,
+          status: bin.status === "full" ? "empty" : "full",
+          latitude: bin.latitude || 0,
+          longitude: bin.longitude || 0,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!data.success) {
+        toast.error(data.error || "Failed to update bin. Please try again.");
+        return;
+      }
+
+      console.log(data);
+      setBin(data.bin);
+
+      toast.success("Bin updated successfully");
+    } catch (error) {
+      console.log("Error updating bin:", error);
+      toast.error("Failed to update bin. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const acceptCollection = async (id) => {
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/collections", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.accessToken}`,
         },
         body: JSON.stringify({ binId: id, collectorId: session?.user.id }),
       });
 
       const result = await response.json();
 
-      if (response.ok) {
+      if (response.ok || response.success) {
         setBin((prevBin) => ({
           ...prevBin,
-          isFull: false,
+          status: "processing",
         }));
-        toast.success("Bin Collected!"); // Show success toast
+        toast.success("Collection Accepted!"); // Show success toast
       } else {
-        toast.error(result.message); // Show error toast
+        toast.error(result.message || "Error accepting collection"); // Show error toast
       }
     } catch (error) {
       toast.error("Failed to collect bin. Please try again.");
@@ -255,7 +227,8 @@ const DustbinPage = ({ params }) => {
                   </span>
                 ) : (
                   <span className="flex items-center gap-1 bg-yellow-100 px-2 py-0.5 rounded-lg  justify-center text-yellow-500 font-semibold">
-                    <BsClock />Processing
+                    <BsClock />
+                    Processing
                   </span>
                 )}
               </div>
@@ -303,12 +276,12 @@ const DustbinPage = ({ params }) => {
             </div>
 
             <div className="flex gap-3 mt-8 justify-center">
-              {bin.isFull && (
+              {bin.isFull && bin.status === "full" && (
                 <button
                   className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onClick={() => collectBin(bin._id)}
+                  onClick={() => acceptCollection(bin._id)}
                 >
-                  Collect Bin
+                  Accept Collection
                 </button>
               )}
               {session?.user.isAdmin && (

@@ -271,7 +271,7 @@ const CollectionRoutesPage = () => {
         </div>
       )}
       <div className="header flex justify-between items-center">
-        <h2 className="font-semibold text-xl ml-6">Routes</h2>
+        <h2 className="font-semibold text-xl">Routes</h2>
         <div className="actions">
           <button
             className="p-2 px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-full"

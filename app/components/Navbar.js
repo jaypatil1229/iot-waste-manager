@@ -9,6 +9,7 @@ import { IoPeopleOutline } from "react-icons/io5";
 import { RiDeleteBin7Line } from "react-icons/ri";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { CiRoute } from "react-icons/ci";
+import { BsTruck } from "react-icons/bs";
 
 import { useMediaQuery } from "react-responsive";
 
@@ -65,6 +66,16 @@ const Navbar = ({ handleNavbarDisplay }) => {
         >
           <RiDeleteBin7Line />
           <span>Dustbins</span>
+        </Link>
+        <Link
+          onClick={() => handleNavbarDisplay(!isSmallScreen)}
+          href="/collections"
+          className={`w-full flex gap-2 items-center ${
+            isActive("/collections") ? "bg-blue-400" : ""
+          }  px-3 py-1 rounded-xl font-semibold`}
+        >
+          <BsTruck />
+          <span>Collections</span>
         </Link>
         <Link
           onClick={() => handleNavbarDisplay(!isSmallScreen)}

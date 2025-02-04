@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 const { Schema, model } = mongoose;
 
 const binCollectionActivitySchema = new Schema({
+  routeId:
+    { type: mongoose.Schema.Types.ObjectId, ref: "CollectionRoute" } || null,
   collectorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   binId: { type: mongoose.Schema.Types.ObjectId, ref: "Bin" },
   status: {

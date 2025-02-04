@@ -58,6 +58,7 @@ const GoogleMapComponent = ({ routeData, isLoaded }) => {
     <GoogleMap
       options={{
         mapTypeControl: false,
+        streetViewControl: false,
       }}
       mapContainerStyle={containerStyle}
       center={center}

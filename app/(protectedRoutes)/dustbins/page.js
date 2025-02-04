@@ -93,14 +93,19 @@ const Page = () => {
     setShowForm(false);
   };
 
-  const handleDelete = async (id) => {
-    console.log("Delete triggered for id:", id);
+  const handleDelete = async (bin) => {
+    if (bin.status === "processing") {
+      toast.error("Bin cannot be deleted because it has collections pending");
+      setLoading(false);
+      return;
+    }
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this bin?"
     );
     if (confirmDelete) {
+      setLoading(true);
       try {
-        const res = await fetch(`/api/bins/${id}`, {
+        const res = await fetch(`/api/bins/${bin._id}`, {
           method: "DELETE",
         });
 
@@ -114,6 +119,8 @@ const Page = () => {
       } catch (error) {
         console.error("Error deleting collector:", error);
         toast.error("Failed to delete dustbin");
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -290,12 +297,12 @@ const Page = () => {
                     <td
                       className={`text-center p-1 font-semibold capitalize
                         ${
-                        bin.status === "processing"
-                          ? "text-yellow-500"
-                          : bin.status === "full"
-                          ? "text-red-500"
-                          : "text-green-500"
-                      }`}
+                          bin.status === "processing"
+                            ? "text-yellow-500"
+                            : bin.status === "full"
+                            ? "text-red-500"
+                            : "text-green-500"
+                        }`}
                     >
                       {bin.status}
                     </td>
@@ -311,7 +318,8 @@ const Page = () => {
                       </button>
                       {session?.user.isAdmin && (
                         <button
-                          onClick={() => handleDelete(bin._id)}
+                          disabled={loading}
+                          onClick={() => handleDelete(bin)}
                           className="px-2 sm:px-3 py-2 bg-red-500 rounded-full text-white font-semibold"
                         >
                           <span className="sm:hidden">

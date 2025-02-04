@@ -1,6 +1,8 @@
 import dbConnect from "@/lib/dbConnect";
 import Bin from "@/models/bin";
+import Collector from "@/models/collector";
 import axios from "axios";
+import { getServerSession } from "next-auth";
 
 const getCordinates = async (location) => {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
@@ -18,6 +20,14 @@ const getCordinates = async (location) => {
 
 export async function GET(req) {
   try {
+    const session = await getServerSession(req);
+
+    if (!session || !session.user) {
+      // Unauthorized if no session or user
+      return new Response(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+      });
+    }
     // Connect to the database
     await dbConnect();
 
@@ -42,9 +52,33 @@ export async function GET(req) {
 }
 export async function POST(req) {
   try {
+    const session = await getServerSession(req);
+
+    if (!session || !session.user) {
+      // Unauthorized if no session or user
+      return new Response(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+      });
+    }
+
     await dbConnect();
+
+    const collector = await Collector.findOne({ email: session.user.email });
+    if (!collector) {
+      return new Response(JSON.stringify({ error: "Collector not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    if (!collector.isAdmin) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
     const { binId, pin, capacity, defaultCity, cityAddress } = await req.json();
-    console.log(binId, pin, capacity, defaultCity, cityAddress);
     if (!binId || !pin || !capacity || !defaultCity) {
       console.log("not all field are there");
       return new Response(
@@ -61,7 +95,6 @@ export async function POST(req) {
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
-    
 
     const location = await getCordinates(cityAddress || defaultCity);
     // Create new collector

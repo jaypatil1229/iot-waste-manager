@@ -2,6 +2,8 @@ import dbConnect from "@/lib/dbConnect";
 import CollectionRoute from "@/models/collectionRoute";
 import Bin from "@/models/bin";
 import BinCollectionActivity from "@/models/binCollectionActivity";
+import Collector from "@/models/collector";
+import { getServerSession } from "next-auth";
 
 export async function GET(req, { params }) {
   try {
@@ -32,6 +34,14 @@ export async function GET(req, { params }) {
 // to update the status of the route
 export async function PUT(req, { params }) {
   try {
+    const session = await getServerSession(req);
+
+    if (!session || !session.user) {
+      // Unauthorized if no session or user
+      return new Response(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+      });
+    }
     const { id } = await params;
     const { routeId } = await req.json();
 
@@ -79,7 +89,12 @@ export async function PUT(req, { params }) {
       { status: "collected", collectedAt: new Date() }
     );
 
-    // Step 5: Mark the route as completed
+    //step 5: //step 4: increase the binsCollected count of the collector as per collectorId, as its a successful collection due to route completion
+    const collector = await Collector.findById(id);
+    collector.binsCollected += binIds.length;
+    await collector.save();
+
+    // Step 6: Mark the route as completed
     await CollectionRoute.findByIdAndUpdate(routeId, { status: "completed" });
 
     return new Response(
@@ -98,6 +113,15 @@ export async function PUT(req, { params }) {
 // to delete the route
 export async function DELETE(req, { params }) {
   try {
+    const session = await getServerSession(req);
+
+    if (!session || !session.user) {
+      // Unauthorized if no session or user
+      return new Response(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+      });
+    }
+
     const { id } = await params;
     const { routeId } = await req.json();
 
@@ -136,7 +160,7 @@ export async function DELETE(req, { params }) {
     // Step 3: Update bins to previous state as the route is rejected
     await Bin.updateMany(
       { _id: { $in: binIds }, status: "processing" },
-      { status: "full" , isFull: true }
+      { status: "full", isFull: true }
     );
 
     // Step 4: Update BinCollectionActivity to "collected"

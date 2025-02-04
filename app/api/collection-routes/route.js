@@ -3,6 +3,7 @@ import Bin from "@/models/bin";
 import BinCollectionActivity from "@/models/binCollectionActivity";
 import collectionRoute from "@/models/collectionRoute";
 import axios from "axios";
+import { getServerSession } from "next-auth";
 
 const getCordinates = async (location) => {
   const apiKey = process.env.GOOGLE_MAPS_API_KEY;
@@ -25,6 +26,15 @@ const isCoordinates = (location) => {
 
 export async function GET(req) {
   try {
+    const session = await getServerSession(req);
+
+    if (!session || !session.user) {
+      // Unauthorized if no session or user
+      return new Response(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+      });
+    }
+
     await dbConnect();
 
     const { searchParams } = new URL(req.url);
@@ -60,7 +70,10 @@ export async function GET(req) {
 
     if (fullBins.length === 0) {
       return new Response(
-        JSON.stringify({ success: true, error: "No full bins or bins are in processing" }),
+        JSON.stringify({
+          success: true,
+          error: "No full bins or bins are in processing",
+        }),
         {
           status: 200,
           headers: { "Content-Type": "application/json" },
@@ -105,6 +118,15 @@ export async function GET(req) {
 
 export async function POST(req) {
   try {
+    const session = await getServerSession(req);
+
+    if (!session || !session.user) {
+      // Unauthorized if no session or user
+      return new Response(JSON.stringify({ message: "Unauthorized" }), {
+        status: 401,
+      });
+    }
+
     const { collectorId, binIds, start, end } = await req.json();
     if (!collectorId || !binIds || binIds.length === 0 || !start || !end) {
       return new Response(
@@ -147,6 +169,7 @@ export async function POST(req) {
 
     // Step 3: Create bin collection activities for each bin
     const collectionActivities = binIds.map((binId) => ({
+      routeId: newRoute._id,
       collectorId,
       binId,
       status: "processing",
