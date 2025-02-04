@@ -10,6 +10,7 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { getSocket } from "@/lib/socket";
 import Loading from "@/app/components/Loading";
+import { BsClock } from "react-icons/bs";
 
 const DustbinPage = ({ params }) => {
   const router = useRouter();
@@ -154,9 +155,7 @@ const DustbinPage = ({ params }) => {
   }, []);
 
   if (status === "loading") {
-    return (
-      <Loading/>
-    );
+    return <Loading />;
   }
 
   if (!session) {
@@ -175,6 +174,7 @@ const DustbinPage = ({ params }) => {
       },
       body: JSON.stringify({
         isFull: !bin.isFull,
+        status: "full",
         latitude: bin.latitude || 0,
         longitude: bin.longitude || 0,
       }),
@@ -222,9 +222,7 @@ const DustbinPage = ({ params }) => {
 
   // Loading state display
   if (loading) {
-    return (
-      <Loading/>
-    );
+    return <Loading />;
   }
 
   // Render bin details when data is available
@@ -247,13 +245,17 @@ const DustbinPage = ({ params }) => {
           <div className="w-full sm:w-1/2 bg-white shadow-lg rounded-xl p-4 flex flex-col gap-3">
             <div className="bin-info relative flex flex-col gap-1">
               <div className="status absolute top-0 right-0">
-                {bin.isFull ? (
+                {bin.status === "full" ? (
                   <span className="flex items-center gap-1 bg-red-100 px-2 py-0.5 rounded-lg justify-center text-red-500 font-semibold">
                     <PiSealWarningBold size={"1.2rem"} /> Full
                   </span>
-                ) : (
+                ) : bin.status === "empty" ? (
                   <span className="flex items-center gap-1 bg-green-100 px-2 py-0.5 rounded-lg  justify-center text-green-500 font-semibold">
                     <LuBadgeCheck size={"1.2rem"} /> Empty
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1 bg-yellow-100 px-2 py-0.5 rounded-lg  justify-center text-yellow-500 font-semibold">
+                    <BsClock />Processing
                   </span>
                 )}
               </div>

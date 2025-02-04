@@ -12,5 +12,5 @@ const collectorSchema = new Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.models.Collector || model('Collector', collectorSchema);
+export default mongoose.models?.Collector || model('Collector', collectorSchema);
 

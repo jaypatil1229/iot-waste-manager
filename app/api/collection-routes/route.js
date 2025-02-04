@@ -1,5 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import Bin from "@/models/bin";
+import BinCollectionActivity from "@/models/binCollectionActivity";
+import collectionRoute from "@/models/collectionRoute";
 import axios from "axios";
 
 const getCordinates = async (location) => {
@@ -50,12 +52,15 @@ export async function GET(req) {
     console.log("End coordinates:", endCordinates);
 
     // Get empty and full bins
-    const emptyBins = await Bin.find({ isFull: false });
-    const fullBins = await Bin.find({ isFull: true });
+    const fullBins = await Bin.find({ isFull: true, status: "full" });
+    //get remaining bins which are not full or processing status
+    const remainingBins = await Bin.find({
+      status: { $in: ["empty", "processing"] },
+    });
 
     if (fullBins.length === 0) {
       return new Response(
-        JSON.stringify({ success: true, error: "No full bins" }),
+        JSON.stringify({ success: true, error: "No full bins or bins are in processing" }),
         {
           status: 200,
           headers: { "Content-Type": "application/json" },
@@ -72,8 +77,8 @@ export async function GET(req) {
       start: `${startCordinates.lat},${startCordinates.lng}`,
       end: `${endCordinates.lat},${endCordinates.lng}`,
       waypoints,
-      emptyBins,
-      fullBins: fullBins,
+      remainingBins,
+      fullBins,
     };
 
     return new Response(JSON.stringify({ success: true, data: routeData }), {
@@ -81,7 +86,7 @@ export async function GET(req) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Error generating route:", error);
+    console.log("Error generating route:", error.message);
     return new Response(
       JSON.stringify({ success: false, error: error.message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
@@ -97,3 +102,70 @@ export async function GET(req) {
 // const response = await axios.get(url);
 // // console.log("Route generated:", response.data);
 // // Return the data as JSON
+
+export async function POST(req) {
+  try {
+    const { collectorId, binIds, start, end } = await req.json();
+    if (!collectorId || !binIds || binIds.length === 0 || !start || !end) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "Invalid request, all fields are required",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    await dbConnect();
+    // Step 1: Mark bins as "processing" and check if the all bins are full with the given ids and if not return an error
+    const bins = await Bin.find({
+      _id: { $in: binIds },
+      isFull: true,
+      status: "full",
+    });
+    if (bins.length !== binIds.length) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: "All bins must be full or not in processing",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // Update bin status to "processing"
+    await Bin.updateMany({ _id: { $in: binIds } }, { status: "processing" });
+
+    // Step 2: Create a collector route entry
+    const newRoute = new collectionRoute({
+      collectorId,
+      bins: binIds,
+      start,
+      end,
+    });
+    await newRoute.save();
+
+    // Step 3: Create bin collection activities for each bin
+    const collectionActivities = binIds.map((binId) => ({
+      collectorId,
+      binId,
+      status: "processing",
+    }));
+    await BinCollectionActivity.insertMany(collectionActivities);
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Route created",
+        route: newRoute,
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  } catch (error) {
+    console.log("Error creating route:", error);
+    return new Response(
+      JSON.stringify({ success: false, error: "Failed to create route" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
+  }
+}

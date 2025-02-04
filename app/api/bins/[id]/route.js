@@ -57,7 +57,7 @@ export async function POST(req, { params }) {
   try {
     const { id } = await params;
     await dbConnect();
-    const { isFull, latitude, longitude } = await req.json();
+    const { isFull, latitude, longitude, status } = await req.json();
 
     if (
       typeof isFull !== "boolean" ||
@@ -80,6 +80,7 @@ export async function POST(req, { params }) {
 
     // Update the bin data
     bin.isFull = isFull;
+    bin.status = status || bin.status;
     if (latitude && longitude) {
       bin.location = { latitude, longitude };
     }

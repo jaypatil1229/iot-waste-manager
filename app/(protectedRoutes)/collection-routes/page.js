@@ -8,6 +8,7 @@ import { RxCross2 } from "react-icons/rx";
 import { MdMyLocation } from "react-icons/md";
 
 import GoogleMapComponent from "@/app/components/GoogleMap";
+import ActiveRoutes from "@/app/components/ActiveRoutes";
 
 const CollectionRoutesPage = () => {
   const { isLoaded } = useJsApiLoader({
@@ -16,15 +17,34 @@ const CollectionRoutesPage = () => {
     libraries: ["places", "geometry"],
   });
 
-  const { data: session, status } = useSession();
+
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [showForm, setShowForm] = useState(false);
   const [routeLocation, setRouteLocation] = useState({
     start: "",
     end: "",
   });
   const [routeData, setRouteData] = useState(null);
+  const [isNewRoute, setIsNewRoute] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeRoutes, setActiveRoutes] = useState([]);
+
+  // Fetch active routes
+  const fetchActiveRoutes = async () => {
+    try {
+      const id = session.user.id;
+      const response = await fetch(`/api/collection-routes/${id}`);
+      const data = await response.json();
+      if (data.success) {
+        setActiveRoutes(data.routes);
+      } else {
+        toast.error(data.error || "Error fetching active routes");
+      }
+    } catch (error) {
+      console.log("Error fetching active routes:", error);
+    }
+  };
 
   useEffect(() => {
     if (status === "loading") return; // Don't do anything if session is still loading
@@ -32,6 +52,10 @@ const CollectionRoutesPage = () => {
       router.push("/login");
       return;
     }
+
+    console.log("Session:", session);
+
+    fetchActiveRoutes();
   }, [status, session, router]);
 
   const handleOpenForm = () => {
@@ -74,6 +98,7 @@ const CollectionRoutesPage = () => {
     } finally {
       setIsLoading(false);
       setShowForm(false);
+      setIsNewRoute(true);
     }
   };
 
@@ -92,6 +117,40 @@ const CollectionRoutesPage = () => {
     }
   };
 
+  const handleNewRoute = async() => {
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `/api/collection-routes`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            collectorId: session.user.id,
+            start: routeData.start,
+            end: routeData.end,
+            binIds: routeData.fullBins.map(bin => bin._id)
+          }),
+        }
+      );
+      const data = await response.json();
+      console.log("New route response:", data);
+      if (data.success) {
+        toast.success("Route created successfully");
+        fetchActiveRoutes();
+      } else {
+        toast.error(data.error || "Failed to create route");
+      }
+    } catch (error) {
+      console.log("Error creating route:", error);
+    } finally {
+      setIsLoading(false);
+      setIsNewRoute(false);
+      setRouteData(null);
+    }
+  }
   return (
     <div className="w-full sm:w-5/6 h-full overflow-x-hidden relative p-3 bg-zinc-100 flex-1 rounded-3xl flex flex-col gap-3">
       {showForm && (
@@ -223,7 +282,26 @@ const CollectionRoutesPage = () => {
         </div>
       </div>
       <hr className="border border-slate-300" />
-      <div className="flex flex-col gap-3 p-3 w-full">
+      <div className="w-full">
+        <ActiveRoutes
+          activeRoutes={activeRoutes}
+          isLoaded={isLoaded}
+          setRouteData={setRouteData}
+          fetchActiveRoutes={fetchActiveRoutes}
+          setIsNewRoute={setIsNewRoute}
+        />
+      </div>
+      <div className="flex relative flex-col gap-3 p-3 w-full">
+        {routeData && isNewRoute && (
+          <div className="absolute z-10 top-5 left-5">
+            <button
+              onClick={() => handleNewRoute()}
+              className="p-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full font-semibold"
+            >
+              Accept Route
+            </button>
+          </div>
+        )}
         {routeData && (
           <GoogleMapComponent routeData={routeData} isLoaded={isLoaded} />
         )}

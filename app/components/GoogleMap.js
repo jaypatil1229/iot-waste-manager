@@ -11,6 +11,7 @@ const containerStyle = {
 const center = { lat: 19.076, lng: 72.8777 };
 
 const GoogleMapComponent = ({ routeData, isLoaded }) => {
+  // console.log("Route data:", routeData);
   const [directions, setDirections] = useState(null);
   useEffect(() => {
     if (!isLoaded || !window.google) {
@@ -54,11 +55,17 @@ const GoogleMapComponent = ({ routeData, isLoaded }) => {
   }
 
   return (
-    <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={12}>
+    <GoogleMap
+      options={{
+        mapTypeControl: false,
+      }}
+      mapContainerStyle={containerStyle}
+      center={center}
+      zoom={12}>
       {/* Render the directions here */}
       {directions && <DirectionsRenderer directions={directions} />}
       {/* Render the markers here different style for empty bins*/}
-      {routeData.emptyBins.map((bin) => (
+      {routeData.remainingBins?.map((bin) => (
         <Marker
           key={bin._id}
           position={{
@@ -66,7 +73,10 @@ const GoogleMapComponent = ({ routeData, isLoaded }) => {
             lng: bin.location.longitude,
           }}
           icon={{
-            url: "/images/green-pin.svg",
+            url: {
+              processing: "https://maps.google.com/mapfiles/kml/paddle/ylw-blank.png",
+              empty: "https://maps.google.com/mapfiles/kml/paddle/grn-blank.png",
+            }[bin.status],
             scaledSize: new google.maps.Size(50, 50),
           }}
           label={{

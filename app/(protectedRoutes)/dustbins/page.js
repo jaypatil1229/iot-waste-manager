@@ -286,15 +286,19 @@ const Page = () => {
                       {bin.capacity}
                     </td>
                     <td className="text-center p-1">{bin.defaultCity}</td>
-                    {bin.isFull ? (
-                      <td className="text-center p-1 text-red-600 font-semibold">
-                        Full
-                      </td>
-                    ) : (
-                      <td className="text-center p-1 text-green-600 font-semibold">
-                        Not Full
-                      </td>
-                    )}
+                    {/* add td for bin status which can be full, empty or processing different colors for different status*/}
+                    <td
+                      className={`text-center p-1 font-semibold capitalize
+                        ${
+                        bin.status === "processing"
+                          ? "text-yellow-500"
+                          : bin.status === "full"
+                          ? "text-red-500"
+                          : "text-green-500"
+                      }`}
+                    >
+                      {bin.status}
+                    </td>
                     <td className="flex gap-2 justify-center items-center p-1">
                       <button
                         onClick={() => handleViewClick(bin.binId)}
