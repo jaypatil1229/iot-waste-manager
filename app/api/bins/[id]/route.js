@@ -157,7 +157,7 @@ export async function POST(req, { params }) {
     // Update the bin data
     bin.isFull = isFull;
     bin.status = status || bin.status;
-    if (latitude && longitude) {
+    if (latitude && longitude && latitude != null && longitude != null) {
       bin.location = { latitude, longitude };
     }
 
