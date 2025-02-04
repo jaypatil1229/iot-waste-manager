@@ -3,6 +3,7 @@ import Bin from "@/models/bin";
 import Collector from "@/models/collector";
 import BinCollectionActivity from "@/models/binCollectionActivity";
 import { getServerSession } from "next-auth";
+import e from "express";
 
 export async function GET(req, { params }) {
   try {
@@ -112,7 +113,7 @@ export async function POST(req, { params }) {
   try {
     const { id } = await params;
     await dbConnect();
-    const { isFull, latitude, longitude, status } = await req.json();
+    const { isFull, latitude, longitude, status, fromBin } = await req.json();
 
     if (
       typeof isFull !== "boolean" ||
@@ -127,10 +128,17 @@ export async function POST(req, { params }) {
     }
 
     // Find the bin by ID
-    const bin = await Bin.findById(id);
+    let bin = null;
+    if (fromBin) {
+      bin = await Bin.findOne({ binId: fromBin });
+    } else {
+      bin = await Bin.findById(id);
+    }
+
     if (!bin) {
       return new Response(JSON.stringify({ error: "Bin not found" }), {
         status: 404,
+        headers: { "Content-Type": "application/json" },
       });
     }
 
