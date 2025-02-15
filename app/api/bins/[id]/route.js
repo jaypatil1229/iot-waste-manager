@@ -76,7 +76,9 @@ export async function DELETE(req, { params }) {
       });
     }
 
-    const collections = await BinCollectionActivity.find({ binId: id });
+    const collections = await BinCollectionActivity.find({ binId: id , 
+      status: "processing"
+    });
     if (collections.length > 0 || bin.status === "processing") {
       return new Response(
         JSON.stringify({

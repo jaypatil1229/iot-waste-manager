@@ -108,9 +108,11 @@ const Page = () => {
         const res = await fetch(`/api/bins/${bin._id}`, {
           method: "DELETE",
         });
+        const response = await res.json();
+        console.log(response);
 
         if (res.ok) {
-          setBins((prevBins) => prevBins.filter((bin) => bin._id !== id));
+          setBins((prevBins) => prevBins.filter((prevbin) => bin._id !== prevbin._id));
           toast.success("Dustbin deleted successfully");
         } else {
           console.error(res.error);
