@@ -60,23 +60,31 @@ IOT-WASTE-MANAGER/
 │   │   ├── page.js             # Entry Page - Login
 │   ├── globals.css             # Global styles
 │   └── favicon.ico             # Site icon
+|
 ├── diagrams/                   # Diagrams about project structure
 │   └── system-flow.jpg
+|
 ├── hardware/                   # Arduino hardware code
 │   └── hardware-sketch.ino
+|
 ├── lib/                        # Utility functions
+|
 ├── models/                     # Mongoose/MongoDB schema files
 │   ├── bin.js
 │   ├── binCollection.js
 │   ├── binCollectionActivity.js
 │   ├── collectionRoute.js
 │   └── collector.js
+|
 ├── node_modules/               # Node.js dependencies
+|
 ├── public/                     # Static files served to client
 │   ├── images/                 # Project images (icons, bins, etc.)
 │   └── screenshots/            # Screenshots used in README.md
+|
 ├── server.js                   # Custom server for real-time Socket.IO
 ├── render.yaml                 # Render deployment configuration
+|
 ├── .gitignore                  # Ignored files and folders
 └── README.md                   # Project documentation
 ```
