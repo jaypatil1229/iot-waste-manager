@@ -42,51 +42,44 @@ This project solves the problem of inefficient garbage collection by integrating
 - MongoDB (Database)
 - Google Maps API and Leaflet.js (for bin location display)
 
+
 ## 📁 Project Structure
 
+```
 IOT-WASTE-MANAGER/
-│
-├── app/                          # Main application folder
-│   ├── protectedRoutes/          # Protected pages/routes
+├── app/                         # Main application folder
+│   ├── protectedRoutes/        # Protected pages/routes
 │   │   ├── collection-routes/
 │   │   ├── collections/
 │   │   ├── collectors/
 │   │   └── dustbins/
-│   ├── api/                      # API route handlers
-│   ├── components/               # Reusable frontend components
-│   ├── login/                    # Login/authentication UI
-│   |   ├── layout.js                 # Layout structure for app
-|   |   ├── page.js                   # Entry Page - Login first
-│   ├── globals.css               # Global styles
-│   └── favicon.ico               # Site icon
-│
-├── diagrams/                     # Diagrams about project structure
+│   ├── api/                    # API route handlers
+│   ├── components/             # Reusable frontend components
+│   ├── login/                  # Login/authentication UI
+│   │   ├── layout.js           # Layout structure for app
+│   │   ├── page.js             # Entry Page - Login
+│   ├── globals.css             # Global styles
+│   └── favicon.ico             # Site icon
+├── diagrams/                   # Diagrams about project structure
 │   └── system-flow.jpg
-│
-├── hardware/                     # Arduino hardware code
+├── hardware/                   # Arduino hardware code
 │   └── hardware-sketch.ino
-│
-├── lib/                          # Utility functions
-│
-├── models/                       # Mongoose/MongoDB schema files
+├── lib/                        # Utility functions
+├── models/                     # Mongoose/MongoDB schema files
 │   ├── bin.js
 │   ├── binCollection.js
 │   ├── binCollectionActivity.js
 │   ├── collectionRoute.js
 │   └── collector.js
-│
-├── node_modules/                 # Node.js dependencies
-│
-├── public/                       # Static files served to client
-│   └── images/                   # Project images (icons, bins, etc.)
-│
-├── server.js                     # Custom server for real-time Socket.IO communication
-├── render.yaml                   # Render deployment configuration
-
-├── .gitignore                    # Ignored files and folders
-└── README.md                     # Project documentation
-
-
+├── node_modules/               # Node.js dependencies
+├── public/                     # Static files served to client
+│   ├── images/                 # Project images (icons, bins, etc.)
+│   └── screenshots/            # Screenshots used in README.md
+├── server.js                   # Custom server for real-time Socket.IO
+├── render.yaml                 # Render deployment configuration
+├── .gitignore                  # Ignored files and folders
+└── README.md                   # Project documentation
+```
 
 
 ## 🧪 How It Works
@@ -123,7 +116,7 @@ IOT-WASTE-MANAGER/
 
 - 🥇 Presented as final year project
 - 🏆 Won 1st Prize at **INNOTRON** – State Level Business Idea Presentation Event  
-  🏅 Selected for final showcase at **CIIA-4 Project Exhibition**, where only 100 projects were chosen from 700+ entries
+- 🏅 Selected for final showcase at **CIIA-4 Project Exhibition**, where only 100 projects were chosen from 700+ entries
 - 🎓 Built with practical implementation goals in mind
 
 
