@@ -31,7 +31,6 @@ export async function GET(req) {
     // Connect to the database
     await dbConnect();
 
-    // Fetch collectors who are not admins
     const bins = await Bin.find();
 
     // Sort bins by `isFill` using a custom sorting function
